@@ -5,7 +5,7 @@ namespace API.Data
 {
     public class BookDbContext : DbContext
     {
-        public BookDbContext(DbContextOptions options) : base(options)
+        public BookDbContext(DbContextOptions<BookDbContext> options) : base(options)
         {
         }
 
@@ -16,6 +16,12 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Book>()
+        .HasOne(b => b.Category)
+        .WithMany(c => c.Books)
+        .HasForeignKey(b => b.CategoryId)
+        .OnDelete(DeleteBehavior.Cascade);
 
             // Seed Categories
             modelBuilder.Entity<Category>().HasData(
