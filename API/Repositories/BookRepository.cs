@@ -16,9 +16,18 @@ namespace API.Repositories
 
         public async Task<Book> CreateAsync(Book book)
         {
-            await context.Books.AddAsync(book);
+        
+            var newBook = new Book
+            {
+                Title = book.Title,
+                Author = book.Author,
+                CategoryId = book.CategoryId,
+                ImageId = book.ImageId  
+            };
+
+            await context.Books.AddAsync(newBook);
             await context.SaveChangesAsync();
-            return book;
+            return newBook;
         }
 
         public async Task<Book?> DeleteAsync(int id)
@@ -39,7 +48,7 @@ namespace API.Repositories
             int pageNumber = 1,
             int pageSize = 1000)
         {
-            var books = context.Books.Include(b => b.Category).AsQueryable();
+            var books = context.Books.Include(b => b.Category).Include(b => b.Image).AsQueryable();
 
             // Filtering
             if (!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
@@ -72,7 +81,7 @@ namespace API.Repositories
 
         public async Task<Book?> GetByIdAsync(int id)
         {
-            return await context.Books.Include(b => b.Category).FirstOrDefaultAsync(x => x.Id == id);
+            return await context.Books.Include(b => b.Category).Include(b => b.Image).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Book?> UpdateAsync(int id, Book book)
@@ -83,6 +92,7 @@ namespace API.Repositories
             bookToUpdate.Title = book.Title;
             bookToUpdate.Author = book.Author;
             bookToUpdate.CategoryId = book.CategoryId;
+            bookToUpdate.ImageId = book.ImageId;  // EKLENDİ
 
             await context.SaveChangesAsync();
             return bookToUpdate;

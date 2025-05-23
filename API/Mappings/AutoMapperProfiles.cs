@@ -13,7 +13,8 @@ namespace API.Mappings
             CreateMap<AddCategoryDto,Category>().ReverseMap();
             CreateMap<UpdateCategoryDto,Category>().ReverseMap();
             CreateMap<AddBookDto, Book>().ReverseMap();
-            CreateMap<UpdateBookDto,Book>().ReverseMap(); 
+            CreateMap<UpdateBookDto,Book>().ReverseMap();
+            CreateMap<Image, ImageDto>().ReverseMap();
 
         }
     }

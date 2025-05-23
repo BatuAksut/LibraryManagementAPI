@@ -43,31 +43,38 @@ namespace API.Controllers
             var bookDto = mapper.Map<BookDto>(book);
             return Ok(bookDto);
         }
+
+
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Writer")]
         public async Task<IActionResult> CreateBook([FromBody] AddBookDto addBookDto)
         {
             if (addBookDto == null) return BadRequest("Book is null");
+
             var book = mapper.Map<Book>(addBookDto);
             var createdBook = await repository.CreateAsync(book);
             var createdBookDto = mapper.Map<BookDto>(createdBook);
             return CreatedAtAction(nameof(GetBook), new { id = createdBook.Id }, createdBookDto);
         }
+
+
         [HttpPut("{id}")]
         [ValidateModel]
         [Authorize(Roles = "Writer")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] UpdateBookDto updateBookDto)
         {
             if (updateBookDto == null) return BadRequest("Book is null");
-            var book = mapper.Map<Book>(updateBookDto);
 
+            var book = mapper.Map<Book>(updateBookDto);
             var updatedBook = await repository.UpdateAsync(id, book);
             if (updatedBook == null) return NotFound();
 
             var updatedBookDto = mapper.Map<BookDto>(updatedBook);
             return Ok(updatedBookDto);
         }
+
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Writer")]
         public async Task<IActionResult> DeleteBook(int id)
