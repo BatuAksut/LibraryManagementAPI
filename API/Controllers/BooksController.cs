@@ -38,7 +38,6 @@ namespace API.Controllers
                 var books = await repository.GetAllAsync(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
                 booksDto = mapper.Map<List<BookDto>>(books);
 
-                // Cache'e ekle
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(2))  
                     .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
