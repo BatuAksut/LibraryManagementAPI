@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.Globalization;
 
 namespace API.Controllers
@@ -17,20 +18,32 @@ namespace API.Controllers
     {
         private readonly IBookRepository repository;
         private readonly IMapper mapper;
+        private readonly IMemoryCache memoryCache;
 
-        public BooksController(IBookRepository repository,IMapper mapper)
+        public BooksController(IBookRepository repository,IMapper mapper, IMemoryCache memoryCache)
         {
             this.repository = repository;
             this.mapper = mapper;
+            this.memoryCache = memoryCache;
         }
         [HttpGet]
         [Authorize(Roles = "Reader")]
         public async Task<IActionResult> GetBooks([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000)
         {
-            var books= await repository.GetAllAsync(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
 
-            var booksDto=mapper.Map<List<BookDto>>(books);
+            var cacheKey = $"books_{filterOn}_{filterQuery}_{sortBy}_{isAscending}_{pageNumber}_{pageSize}";
+            if (!memoryCache.TryGetValue(cacheKey, out List<BookDto>? booksDto))
+            {
+                var books = await repository.GetAllAsync(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
+                booksDto = mapper.Map<List<BookDto>>(books);
+
+                // Cache'e ekle
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(2))  
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+                memoryCache.Set(cacheKey, booksDto, cacheEntryOptions);
+            }
             return Ok(booksDto);
         }
 

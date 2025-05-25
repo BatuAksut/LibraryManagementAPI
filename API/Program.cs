@@ -84,6 +84,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 
+builder.Services.AddMemoryCache();
 
 
 
